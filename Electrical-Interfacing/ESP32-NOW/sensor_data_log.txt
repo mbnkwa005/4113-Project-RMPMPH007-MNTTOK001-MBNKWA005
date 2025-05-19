@@ -1,0 +1,160 @@
+[2025-05-18 00:45:19]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:45:29]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:45:40]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:45:49]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:45:59]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:46:09]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:46:19]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:46:59]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:47:19]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:47:29]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:53:39]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 00:53:49]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 11:15:37]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 11:15:47]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 11:15:57]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 11:16:07]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 11:16:17]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 11:16:28]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 11:16:39]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
+[2025-05-18 11:16:47]
+RFID: RFID1234567890
+Weight: 2.5 kg
+Temperature: 25.6 °C
+Humidity: 55.2 %
+Light: 300 lx
+Pressure: 1013 hPa
+----------------------------------------
