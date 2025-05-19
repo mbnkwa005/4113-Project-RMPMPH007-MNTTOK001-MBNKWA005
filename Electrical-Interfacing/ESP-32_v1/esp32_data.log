@@ -1,0 +1,16 @@
+ESP32 Data Log - Created at 2025-05-17T17:41:00.550998
+
+[2025-05-17T17:41:05.012118] {'device_id': 'ESP32_Test_Device', 'temperature': 27, 'humidity': 59, 'reading_time': 1662}
+[2025-05-17T17:42:16.215407] {'device_id': 'ESP32_Test_Device', 'temperature': 27, 'humidity': 59, 'reading_time': 2106}
+[2025-05-17T17:42:21.340391] {'device_id': 'ESP32_Test_Device', 'temperature': 26, 'humidity': 58, 'reading_time': 7216}
+[2025-05-17T17:42:26.433900] {'device_id': 'ESP32_Test_Device', 'temperature': 25, 'humidity': 47, 'reading_time': 12329}
+[2025-05-17T17:42:31.640317] {'device_id': 'ESP32_Test_Device', 'temperature': 28, 'humidity': 48, 'reading_time': 17411}
+[2025-05-17T17:42:36.738500] {'device_id': 'ESP32_Test_Device', 'temperature': 28, 'humidity': 54, 'reading_time': 22627}
+[2025-05-17T17:42:41.836516] {'device_id': 'ESP32_Test_Device', 'temperature': 20, 'humidity': 44, 'reading_time': 27729}
+[2025-05-17T17:42:47.011134] {'device_id': 'ESP32_Test_Device', 'temperature': 29, 'humidity': 49, 'reading_time': 32822}
+[2025-05-17T17:42:52.324600] {'device_id': 'ESP32_Test_Device', 'temperature': 20, 'humidity': 41, 'reading_time': 37999}
+[2025-05-17T17:42:57.443831] {'device_id': 'ESP32_Test_Device', 'temperature': 26, 'humidity': 47, 'reading_time': 43301}
+[2025-05-17T17:43:02.793330] {'device_id': 'ESP32_Test_Device', 'temperature': 20, 'humidity': 55, 'reading_time': 48437}
+[2025-05-17T17:43:07.889992] {'device_id': 'ESP32_Test_Device', 'temperature': 23, 'humidity': 42, 'reading_time': 53779}
+[2025-05-17T17:43:12.981039] {'device_id': 'ESP32_Test_Device', 'temperature': 29, 'humidity': 42, 'reading_time': 58879}
+[2025-05-17T17:43:18.083796] {'device_id': 'ESP32_Test_Device', 'temperature': 21, 'humidity': 52, 'reading_time': 63955}
