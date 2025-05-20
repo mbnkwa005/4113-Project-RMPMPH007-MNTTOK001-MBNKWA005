@@ -27,11 +27,11 @@ def receive_sensor_data():
         with open(LOG_FILE, "a") as f:
             f.write(log_entry)
 
-        print("✅ Data received and logged.")
+        print("Data received and logged.")
         return jsonify({"message": "Data logged successfully"}), 200
 
     except Exception as e:
-        print("❌ Error:", e)
+        print("Error:", e)
         return jsonify({"error": "Failed to process data"}), 400
 
 if __name__ == '__main__':
