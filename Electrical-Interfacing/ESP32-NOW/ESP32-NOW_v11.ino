@@ -14,10 +14,9 @@ typedef struct struct_message {
 
 struct_message incomingData;
 
-// ✅ New callback signature for ESP-NOW receive
 void OnDataRecv(const esp_now_recv_info_t *info, const uint8_t *incomingDataRaw, int len) {
   memcpy(&incomingData, incomingDataRaw, sizeof(incomingData));
-  Serial.println("✅ Data received via ESP-NOW:");
+  Serial.println("Data received via ESP-NOW:");
   Serial.printf("RFID: %s\n", incomingData.rfid);
   Serial.printf("Weight: %.2f\n", incomingData.weight);
   Serial.printf("Temp: %.2f\n", incomingData.temperature);
@@ -40,11 +39,10 @@ void setup() {
   Serial.println("ESP32-CAM Receiver Ready");
 
   if (esp_now_init() != ESP_OK) {
-    Serial.println("❌ Error initializing ESP-NOW");
+    Serial.println("Error initializing ESP-NOW");
     return;
   }
-
-  // ✅ Register receive callback with new signature
+  
   esp_now_register_recv_cb(OnDataRecv);
 }
 
