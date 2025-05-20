@@ -20,7 +20,7 @@ void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_STA);
   if (esp_now_init() != ESP_OK) {
-    Serial.println("❌ ESP-NOW init failed");
+    Serial.println("ESP-NOW init failed");
     return;
   }
 
@@ -36,9 +36,9 @@ void setup() {
 void loop() {
   esp_err_t result = esp_now_send(receiverMac, (uint8_t *)&testData, sizeof(testData));
   if (result == ESP_OK) {
-    Serial.println("✅ Data sent via ESP-NOW");
+    Serial.println("Data sent via ESP-NOW");
   } else {
-    Serial.println("❌ Failed to send data");
+    Serial.println("Failed to send data");
   }
   delay(10000);  // Send every 10 seconds
 }
