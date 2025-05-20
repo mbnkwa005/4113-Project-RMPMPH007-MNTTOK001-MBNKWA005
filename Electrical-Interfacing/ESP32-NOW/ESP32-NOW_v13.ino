@@ -4,7 +4,7 @@
 
 // Wi-Fi credentials
 const char* ssid = "kmaba";
-const char* password = "00000000";  // Replace with actual password
+const char* password = "00000000"; 
 
 // Flask server endpoint
 const char* serverUrl = "http://192.168.247.73:5000/api/sensor";
@@ -27,7 +27,7 @@ bool dataReceived = false;
 
 void OnDataRecv(const esp_now_recv_info_t *info, const uint8_t *data, int len) {
   memcpy(&incomingData, data, sizeof(incomingData));
-  Serial.println("✅ ESP-NOW data received:");
+  Serial.println("ESP-NOW data received:");
   Serial.printf("RFID: %s\n", incomingData.rfid);
 
   // Flash the LED
@@ -44,10 +44,10 @@ void setup() {
   digitalWrite(LED_PIN, LOW);
 
   WiFi.mode(WIFI_STA);  // Important: must be in station mode for ESP-NOW
-  Serial.println("✅ ESP32-CAM Ready to receive ESP-NOW data");
+  Serial.println("ESP32-CAM Ready to receive ESP-NOW data");
 
   if (esp_now_init() != ESP_OK) {
-    Serial.println("❌ Error initializing ESP-NOW");
+    Serial.println("Error initializing ESP-NOW");
     return;
   }
 
@@ -58,7 +58,7 @@ void loop() {
   if (dataReceived) {
     dataReceived = false;
 
-    Serial.print("🔍 Connecting to SSID: ");
+    Serial.print("Connecting to SSID: ");
     Serial.println(ssid);
 
     WiFi.begin(ssid, password);
@@ -70,8 +70,8 @@ void loop() {
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.println("\n✅ WiFi connected!");
-      Serial.print("📶 IP address: ");
+      Serial.println("\nWiFi connected!");
+      Serial.print("IP address: ");
       Serial.println(WiFi.localIP());
 
       // Send the data to Flask server
@@ -91,11 +91,11 @@ void loop() {
       int httpResponseCode = http.POST(payload);
 
       if (httpResponseCode > 0) {
-        Serial.printf("✅ Data sent! Server responded with code: %d\n", httpResponseCode);
+        Serial.printf("Data sent! Server responded with code: %d\n", httpResponseCode);
         String response = http.getString();
-        Serial.println("📥 Response: " + response);
+        Serial.println("Response: " + response);
       } else {
-        Serial.printf("❌ Failed to send data. HTTP error: %s\n", http.errorToString(httpResponseCode).c_str());
+        Serial.printf("Failed to send data. HTTP error: %s\n", http.errorToString(httpResponseCode).c_str());
       }
 
       http.end();
@@ -104,9 +104,9 @@ void loop() {
       WiFi.disconnect(true);
       WiFi.mode(WIFI_OFF);
 
-      Serial.println("📴 WiFi disconnected\n");
+      Serial.println("WiFi disconnected\n");
     } else {
-      Serial.println("\n❌ WiFi connection failed");
+      Serial.println("\nWiFi connection failed");
     }
 
     // Reinitialize ESP-NOW after Wi-Fi shutdown
