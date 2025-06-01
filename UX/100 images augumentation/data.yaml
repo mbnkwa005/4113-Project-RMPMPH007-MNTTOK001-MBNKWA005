@@ -1,0 +1,13 @@
+names:
+- molting
+- non molting
+nc: 2
+roboflow:
+  license: CC BY 4.0
+  project: object-detection-7mpdb
+  url: https://universe.roboflow.com/final-year-design/object-detection-7mpdb/dataset/2
+  version: 2
+  workspace: final-year-design
+test: ../test/images
+train: ../train/images
+val: ../valid/images
