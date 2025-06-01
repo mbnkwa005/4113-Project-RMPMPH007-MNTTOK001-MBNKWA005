@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Detection - Penguin Monitoring</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); /* Consistent with index */
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            color: #333; /* Default text color for content */
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card {
+            border-radius: 15px; /* Rounded corners for cards */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Subtle shadow */
+            border: none; /* Remove default border */
+            overflow: hidden; /* Ensures rounded corners are respected */
+        }
+
+        .card-header {
+            background-color: #1a2a6c; /* Dark blue header */
+            color: white;
+            font-weight: bold;
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+
+        .connection-status {
+            padding: 20px;
+            border-radius: 15px; /* Match card border-radius */
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            color: #333;
+        }
+        .connection-status h4 {
+             color: #333; /* Ensure header color is readable */
+             margin-bottom: 10px;
+        }
+        .connecting {
+            background-color: #fff3cd; /* Yellowish */
+            border: 1px solid #ffeeba;
+        }
+        .connected {
+            background-color: #d4edda; /* Greenish */
+            border: 1px solid #c3e6cb;
+        }
+        .failed {
+            background-color: #f8d7da; /* Reddish */
+            border: 1px solid #f5c6cb;
+        }
+        .progress {
+            height: 10px; /* Thinner progress bar */
+            margin-top: 10px;
+        }
+        .progress-bar {
+            background-color: #1a2a6c; /* Use primary color for progress */
+        }
+
+
+        .live-indicator {
+            width: 12px; /* Slightly larger */
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px; /* Increased spacing */
+            position: relative;
+            top: 2px; /* Align with text */
+        }
+        .live-indicator.active {
+            background-color: #28a745; /* Green */
+            box-shadow: 0 0 8px #28a745; /* Subtle glow */
+        }
+        .live-indicator.inactive {
+            background-color: #dc3545; /* Red */
+             box-shadow: 0 0 8px #dc3545;
+        }
+         .live-indicator.waiting {
+            background-color: #0d6efd; /* Blue */
+             box-shadow: 0 0 8px #0d6efd;
+             animation: pulse-blue 1.5s infinite;
+         }
+
+        @keyframes pulse-blue {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+            }
+        }
+
+        #detectionStream {
+            display: none; /* Hide by default */
+            max-height: 500px; /* Adjusted height */
+            overflow-y: auto;
+            padding-right: 15px; /* Space for scrollbar */
+        }
+
+        #connectionPlaceholder {
+            display: flex; /* Use flex to center content */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px; /* Give it some height */
+            color: #6c757d;
+            /* Remove background-color: #ff000055; after testing */
+        }
+
+        /* Style for individual detection cards in the stream */
+        .detection-card {
+            background-color: #e9ecef; /* Light grey background */
+            border-left: 5px solid #1a2a6c; /* Accent color border */
+            margin-bottom: 15px; /* Space between cards */
+            padding: 15px;
+            border-radius: 8px; /* Slightly less rounded than main card */
+            transition: all 0.2s ease-in-out;
+        }
+        .detection-card:hover {
+            background-color: #dee2e6;
+        }
+         .detection-card h5 {
+            color: #1a2a6c; /* Dark blue title */
+            margin-bottom: 5px;
+         }
+         .detection-card p {
+            margin-bottom: 5px;
+            font-size: 0.95em;
+            color: #555;
+         }
+         .detection-card img {
+             max-width: 100px; /* Limit image size in card */
+             height: auto;
+             border-radius: 5px;
+             margin-top: 10px;
+         }
+
+        /* Stats Card improvements */
+        .stats-card .card-body {
+            text-align: center;
+        }
+        .stats-card .stats-number {
+            font-size: 2em; /* Slightly smaller font */
+            font-weight: bold;
+            color: #1a2a6c; /* Dark blue color */
+            margin: 10px 0;
+        }
+        .stats-card .stats-label {
+            color: #6c757d; /* Muted text */
+            font-size: 0.9em; /* Smaller label */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+         #currentStats p {
+             margin-bottom: 8px; /* Space out stats lines */
+             font-size: 1em;
+             color: #333;
+         }
+         #currentStats span {
+             font-weight: bold;
+             color: #1a2a6c; /* Dark blue for values */
+         }
+
+        /* Added style for 'waiting' status */
+        .waiting-for-data {
+            background-color: #cfe2ff; /* Light blue */
+            border: 1px solid #b9d3f3;
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Penguin Monitoring</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/live_detection">Live Detection</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('database_view') }}">Database</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="text-center mb-4" style="color: #333;">Live Detection Stream</h1> <!-- Page Title -->
+
+        <div class="row">
+            <div class="col-12">
+                <div class="connection-status connecting" id="connectionStatus"> <!-- Start in connecting state -->
+                    <h4>
+                        <span class="live-indicator waiting" id="liveIndicator"></span> <!-- Start with waiting indicator -->
+                        Connection Status
+                    </h4>
+                    <p id="connectionMessage">Attempting to connect to detection system...</p> <!-- Initial message -->
+                    <div class="progress" > <!-- Progress bar visible initially -->
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                             id="connectionProgress"
+                             role="progressbar"
+                             style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Detection Feed</h5> <!-- Changed title -->
+                    </div>
+                    <div class="card-body">
+                        <div id="detectionStream">
+                            <!-- Add the connection placeholder -->
+                            <div id="connectionPlaceholder" class="text-center mt-5" style="color: #6c757d; background-color: #ff000055;"> <!-- Added temporary background -->
+                                <i class="fas fa-camera fa-5x mb-3"></i>
+                                <h5>Connecting to feed...</h5>
+                                <p>Waiting for the first detection.</p>
+                            </div>
+                            <!-- Detection results will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stats-card"> <!-- Added stats-card class -->
+                    <div class="card-header">
+                        <h5 class="mb-0">Current Stats</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="currentStats">
+                            <p>Total Penguins: <span id="totalDetections">0</span></p> <!-- Changed label -->
+                            <p>Detections Today: <span id="penguinsDetected">0</span></p> <!-- Changed label -->
+                            <p>Molting Detected: <span id="moltingDetected">0</span></p>
+                            <p>Last Update: <span id="lastUpdate">Never</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let connectionAttempts = 0;
+        const maxAttempts = 5; // Maximum connection attempts (changed from 8 to 5)
+        const retryDelay = 5000; // 5 seconds delay between attempts
+        let isConnected = false; // Flag to indicate successful initial data reception
+        let lastCheckedTime = null; // Timestamp for the last data fetch
+        const dataCheckInterval = 5000; // Check for new data every 5 seconds
+        let dataCheckTimer = null; // Timer for periodic data checks
+
+        function updateConnectionStatus(status, message) {
+            const statusDiv = document.getElementById('connectionStatus');
+            const indicator = document.getElementById('liveIndicator');
+            const messageEl = document.getElementById('connectionMessage');
+            const progressBar = document.getElementById('connectionProgress');
+            const placeholderDiv = document.getElementById('connectionPlaceholder');
+            const streamDiv = document.getElementById('detectionStream');
+
+            // Reset classes
+            statusDiv.classList.remove('connecting', 'connected', 'failed', 'waiting-for-data');
+            indicator.classList.remove('active', 'inactive', 'waiting');
+
+            messageEl.textContent = message;
+
+            if (status === 'connecting') {
+                statusDiv.classList.add('connecting');
+                indicator.classList.add('waiting');
+                progressBar.style.display = 'block';
+                const progress = (connectionAttempts / maxAttempts) * 100;
+                progressBar.style.width = progress + '%';
+                progressBar.classList.add('progress-bar-animated', 'progress-bar-striped');
+                progressBar.style.backgroundColor = '';
+
+                placeholderDiv.style.display = 'flex';
+                streamDiv.style.display = 'none';
+
+            } else if (status === 'active') {
+                statusDiv.classList.add('connected');
+                indicator.classList.add('active');
+                progressBar.style.display = 'none';
+                messageEl.textContent = 'Live Feed Active';
+                placeholderDiv.style.display = 'none';
+                streamDiv.style.display = 'block';
+
+            } else if (status === 'waiting') {
+                statusDiv.classList.add('waiting-for-data');
+                indicator.classList.add('waiting');
+                progressBar.style.display = 'none';
+                messageEl.textContent = 'Waiting for new data...';
+                placeholderDiv.style.display = 'flex';
+                streamDiv.style.display = 'none';
+
+            } else if (status === 'failed') {
+                statusDiv.classList.add('failed');
+                indicator.classList.add('inactive');
+                progressBar.style.display = 'block';
+                progressBar.style.width = '100%';
+                progressBar.classList.remove('progress-bar-animated', 'progress-bar-striped');
+                progressBar.style.backgroundColor = '#dc3545';
+                messageEl.textContent = message || 'Failed to connect.';
+
+                placeholderDiv.style.display = 'flex';
+                streamDiv.style.display = 'none';
+            }
+        }
+
+        function addDetectionCard(detection) {
+            const stream = document.getElementById('detectionStream');
+            // Ensure the stream is visible when adding cards
+            stream.style.display = 'block';
+            // Hide the connection placeholder if it's visible
+            const connectionPlaceholder = document.getElementById('connectionPlaceholder');
+            if(connectionPlaceholder) {
+                connectionPlaceholder.style.display = 'none';
+            }
+
+            const card = document.createElement('div');
+            card.className = 'detection-card';
+
+            const timestamp = new Date(detection.timestamp).toLocaleString();
+            const confidence = (detection.confidence * 100).toFixed(2);
+            const label = detection.label.replace('_', ' ').toUpperCase();
+            const source = detection.detection_type || 'Unknown';
+
+            // Add image if available
+            let imageHtml = '';
+            if (detection.image_path && detection.image_path !== 'default.jpg') {
+                const imageUrl = `/static/uploads/${detection.image_path.split('/').pop()}`;
+                imageHtml = `<img src="${imageUrl}" alt="Detected Penguin" class="mt-2 img-fluid">`;
+            }
+
+            card.innerHTML = `
+                <h5>${label}</h5>
+                <p>Source: ${source}</p>
+                <p>Name: ${detection.name || 'N/A'}</p>
+                <p>RFID: ${detection.rfid || 'N/A'}</p>
+                <p>Weight: ${detection.weight || 'N/A'} kg</p>
+                <p>Confidence: ${confidence}%</p>
+                <p>Time: ${timestamp}</p>
+                ${imageHtml}
+            `;
+
+            stream.insertBefore(card, stream.firstChild);
+
+            // Limit the number of displayed cards
+            while (stream.children.length > 10) {
+                stream.removeChild(stream.lastChild);
+            }
+        }
+
+        function updateStats() {
+            fetch('/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('totalDetections').textContent = data.total_penguins; // Total Penguins
+                    // Ensure these stats fields exist in your /stats endpoint response
+                    document.getElementById('penguinsDetected').textContent = data.detections_today || 'N/A'; // Detections Today
+                    document.getElementById('moltingDetected').textContent = (data.success_rate !== undefined ? data.success_rate + '% succ.' : 'N/A'); // Molting Detected Rate
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+                })
+                .catch(error => {
+                    console.error('Error updating stats:', error);
+                });
+        }
+
+        function startDataCheckInterval() {
+             if (!dataCheckTimer) {
+                console.log(`Starting data check interval every ${dataCheckInterval / 1000} seconds.`);
+                dataCheckTimer = setInterval(checkForNewData, dataCheckInterval);
+             }
+        }
+
+        function stopDataCheckInterval() {
+             if (dataCheckTimer) {
+                 console.log('Stopping data check interval.');
+                 clearInterval(dataCheckTimer);
+                 dataCheckTimer = null;
+             }
+        }
+
+        function attemptConnection() {
+            console.log(`Attempting connection ${connectionAttempts + 1}/${maxAttempts}...`);
+            connectionAttempts++;
+
+            updateConnectionStatus('connecting', `Attempting to connect to data feed (${connectionAttempts}/${maxAttempts})...`);
+
+            if (connectionAttempts > maxAttempts) {
+                updateConnectionStatus('failed', 'Failed to connect after ' + maxAttempts + ' attempts.');
+                isConnected = false;
+                stopDataCheckInterval(); // Stop any potential interval
+                return;
+            }
+
+            // Attempt to fetch latest data. Use a time far in the past to get any existing data.
+            const initialFetchTime = lastCheckedTime || new Date(0).toISOString(); // Use lastCheckedTime if available
+
+            fetch('/check_for_new_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    last_checked_time: initialFetchTime,
+                    test: connectionAttempts === 1 // Add a test flag for the first attempt if needed by server
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // If server endpoint returns an error, treat as failure for this attempt
+                    console.error(`Connection attempt ${connectionAttempts} received HTTP status ${response.status}.`);
+                    // No need to throw here, just log and let the catch handle the retry
+                    return Promise.reject(new Error(`HTTP error! status: ${response.status}`));
+                }
+                return response.json();
+            })
+            .then(data => {
+                 console.log(`Attempt ${connectionAttempts} successful. Data received:`, data);
+
+                 if (data && data.new_data && data.new_data.length > 0) {
+                    // Success: Received new data during connection attempt
+                    isConnected = true;
+                    updateConnectionStatus('active', 'Live Feed Active');
+                    console.log('Initial data received, processing...');
+
+                    // Process and display the received data
+                    data.new_data.forEach(detection => {
+                         addDetectionCard(detection);
+                    });
+
+                     // Set lastCheckedTime based on the latest received data
+                    lastCheckedTime = data.new_data[0].last_update_time; // Assuming data is sorted DESC
+                    updateStats(); // Update stats
+
+                    // Start periodic data checks now that initial connection is established
+                    startDataCheckInterval();
+
+                 } else {
+                     // Server reachable, but no *new* data found or empty data. Retry connection attempt.
+                     console.log(`Attempt ${connectionAttempts}: Server reachable, but no new data found.`);
+                     console.log(`Retrying connection in ${retryDelay / 1000} seconds...`);
+                     // Recursively call attemptConnection for the next attempt after delay
+                     setTimeout(attemptConnection, retryDelay);
+                 }
+            })
+            .catch(error => {
+                console.error(`Connection attempt ${connectionAttempts} failed:`, error);
+                isConnected = false; // Ensure isConnected is false on failure
+                console.log(`Retrying connection in ${retryDelay / 1000} seconds...`);
+                // Retry connection attempt after a delay due to network or server error
+                // Recursively call attemptConnection for the next attempt
+                setTimeout(attemptConnection, retryDelay);
+            });
+        }
+
+        function checkForNewData() {
+            if (!isConnected) {
+                console.log('Not connected, skipping data check.');
+                return;
+            }
+
+            console.log(`Checking for new data since ${lastCheckedTime || 'epoch'}...`);
+
+            fetch('/check_for_new_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    last_checked_time: lastCheckedTime
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error(`HTTP error! status: ${response.status} during data check.`);
+                    stopDataCheckInterval();
+                    isConnected = false;
+                    updateConnectionStatus('failed', 'Data feed interrupted. Attempting to reconnect...');
+                    connectionAttempts = 0;
+                    attemptConnection();
+                    return Promise.reject(new Error(`HTTP error! status: ${response.status}`));
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.new_data && data.new_data.length > 0) {
+                    console.log(`New data received:`, data.new_data);
+                    data.new_data.forEach(detection => {
+                        addDetectionCard(detection);
+                    });
+                    lastCheckedTime = data.new_data[0].timestamp;
+                    updateStats();
+                    updateConnectionStatus('active', 'Live Feed Active');
+                } else {
+                    console.log('No new data found in this check.');
+                    updateConnectionStatus('waiting', 'Waiting for new data...');
+                }
+            })
+            .catch(error => {
+                console.error('Error checking for new data:', error);
+                stopDataCheckInterval();
+                isConnected = false;
+                updateConnectionStatus('failed', 'Data feed interrupted. Attempting to reconnect...');
+                connectionAttempts = 0;
+                attemptConnection();
+            });
+        }
+
+        // Start connection attempts and initial stats update when page loads
+        window.onload = function() {
+            updateStats(); // Initial stats update
+
+            // Start the initial data feed connection process
+            // The first attempt is initiated directly, subsequent attempts via setTimeout
+            attemptConnection();
+        };
+
+         // Optional: Clear interval when navigating away
+         window.addEventListener('beforeunload', function() {
+             stopDataCheckInterval();
+         });
+
+    </script>
+</body>
+</html> 

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penguin Detection System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            color: #333;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .section-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stats-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #0d6efd;
+            margin: 10px 0;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-body label.form-label {
+            display: block !important;
+            color: #333 !important;
+        }
+
+        .detection-placeholder {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            color: #6c757d;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .detection-indicator {
+            width: 15px;
+            height: 15px;
+            background-color: #28a745;
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            transform: scale(1);
+            animation: pulse-green 2s infinite;
+        }
+
+        .detection-error .detection-indicator {
+            background-color: #dc3545;
+            box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
+
+        @keyframes pulse-red {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+
+        .recent-activity {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+
+        .activity-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .activity-item:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .activity-item h6 a {
+            color: #1a2a6c;
+            text-decoration: none;
+        }
+
+        .activity-item h6 a:hover {
+            text-decoration: underline;
+        }
+
+        .activity-item small {
+            font-size: 0.85em;
+        }
+
+        .btn-primary {
+            background-color: #1a2a6c;
+            border-color: #1a2a6c;
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+
+        .btn-primary:hover {
+            background-color: #0d1a4a;
+            border-color: #0d1a4a;
+        }
+
+        .btn-secondary {
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #1a2a6c;
+            border-bottom: 2px solid #1a2a6c;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .penguin-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+
+        .penguin-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .penguin-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .form-label {
+            display: block;
+            color: #333;
+        }
+
+        .row {
+            margin-top: 20px;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            border-bottom: none;
+        }
+
+        .modal-footer {
+            border-top: none;
+        }
+
+        .stats-card {
+            border: none;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+        }
+
+        .stats-number {
+            color: #1a2a6c;
+        }
+
+        .database-button-section {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        /* New styles for color coding recent activity items */
+        .activity-live {
+            border-left: 5px solid #28a745; /* Green border for Live */
+        }
+
+        .activity-manual {
+            border-left: 5px solid #0d6efd; /* Blue border for Manual */
+        }
+
+        /* Add these styles to your existing CSS */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: start;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .activity-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .activity-item.danger {
+            border-left: 4px solid #dc3545;
+        }
+
+        .activity-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            padding-top: 0.25rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-content h4 {
+            margin: 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .activity-content p {
+            margin: 0.5rem 0;
+            color: #666;
+        }
+
+        .activity-content small {
+            color: #888;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+        }
+
+        .title-design {
+            font-size: 3em;
+            font-weight: bold;
+            color: #1a2a6c; /* Using a color from the existing theme */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1.5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">Penguin Monitoring</a>
+    <div class="container py-4">
+        <h1 class="text-center mb-4 title-design">🐧 Penguin Detection System 🐧</h1>
+        
+        <!-- Main Sections -->
+        <div class="row">
+            <!-- Manual Detection Section -->
+            <div class="col-md-12 mb-4">
+                <div class="section-card">
+                    <h2 class="section-title">Manual Detection</h2>
+                    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#manualDetectionModal">
+                        Add New Penguin
+                    </button>
+                </div>
+            </div>
+
+            <!-- Database Section (Button Only) -->
+            <div class="col-12 mb-4">
+                <div class="section-card database-button-section">
+                    <h2 class="section-title">Penguin Database</h2>
+                    <div class="text-center">
+                        <a href="{{ url_for('database_view') }}" class="btn btn-custom w-100">
+                            <i class="fas fa-database"></i> View Database
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="row mt-4">
+            <div class="col-12 mb-4">
+                <div class="section-card">
+                    <h2 class="section-title">Recent Activity</h2>
+                    <div class="activity-list">
+                        {% for penguin in penguins[:5] %}
+                            {% if penguin.predictions and penguin.predictions|length > 0 %}
+                                {% set latest_prediction = penguin.predictions[-1] %}
+                                <div class="activity-item {% if latest_prediction.label == 'non_penguin' %}danger{% endif %}">
+                                    <div class="activity-icon">
+                                        {% if latest_prediction.label == 'non_penguin' %}
+                                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                                        {% elif latest_prediction.label == 'molting' %}
+                                            <i class="fas fa-feather-alt text-warning"></i>
+                                        {% else %}
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>{{ penguin.name }}</h4>
+                                        <p>
+                                            {% if latest_prediction.label == 'non_penguin' %}
+                                                <span class="text-danger">⚠️ DANGER: Non-penguin object detected!</span>
+                                            {% elif latest_prediction.label == 'molting' %}
+                                                Molting detected ({{ "%.1f"|format(latest_prediction.confidence * 100) }}% confidence)
+                                            {% else %}
+                                                Normal status ({{ "%.1f"|format(latest_prediction.confidence * 100) }}% confidence)
+                                            {% endif %}
+                                        </p>
+                                        <small>{{ latest_prediction.timestamp }}</small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="fas fa-info-circle text-info"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>{{ penguin.name }}</h4>
+                                        <p>No recent detections</p>
+                                        <small>Added: {{ penguin.last_update_time }}</small>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="row mt-4">
+            <h2 class="section-title text-center">Statistics</h2>
+            <div class="col-md-6">
+                <div class="stats-card">
+                    <div class="stats-label">Total Penguins</div>
+                    <div class="stats-number">{{ penguins|length }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stats-card">
+                    <div class="stats-label">Average Weight</div>
+                    <div class="stats-number">
+                        {% set total_weight = penguins|sum(attribute='weight') %}
+                        {% if penguins|length > 0 %}
+                            {{ "%.1f"|format(total_weight / penguins|length) }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manual Detection Modal -->
+    <div class="modal fade" id="manualDetectionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Add New Penguin</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="manualDetectionForm" action="{{ url_for('add_penguin') }}" method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label fw-bold" style="display: block; color: #333;">Penguin Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="rfid" class="form-label fw-bold" style="display: block; color: #333;">RFID Tag</label>
+                                <input type="text" class="form-control" id="rfid" name="rfid" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="detection_time" class="form-label fw-bold" style="display: block; color: #333;">Time of Detection</label>
+                                <input type="datetime-local" class="form-control" id="detection_time" name="detection_time" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="weight" class="form-label fw-bold" style="display: block; color: #333;">Weight (kg)</label>
+                                <input type="number" step="0.1" class="form-control" id="weight" name="weight" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="sex" class="form-label fw-bold" style="display: block; color: #333;">Sex</label>
+                                <select class="form-control" id="sex" name="sex" required>
+                                    <option value="">Select sex</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Unknown">Unknown</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="image" class="form-label fw-bold" style="display: block; color: #333;">Penguin Image</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                            <div class="form-text">Upload a clear image of the penguin</div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary ms-2">Add Penguin</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            // Function to update stats
+            function updateStats() {
+                fetch('/stats')
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('totalDetections').textContent = data.total_penguins;
+                        document.getElementById('penguinsDetected').textContent = data.detections_today || 'N/A';
+                        document.getElementById('moltingDetected').textContent = (data.success_rate !== undefined ? data.success_rate + '% succ.' : 'N/A');
+                        document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+                    })
+                    .catch(error => {
+                        console.error('Error updating stats:', error);
+                    });
+            }
+
+            function updateRecentActivity() {
+                fetch('/check_for_new_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        last_checked_time: new Date(0).toISOString(),
+                        test: true
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.new_data && data.new_data.length > 0) {
+                        const activityList = document.querySelector('.activity-list');
+                        const existingItems = new Map();
+                        
+                        // Store existing items in a map for quick lookup
+                        activityList.querySelectorAll('.activity-item').forEach(item => {
+                            const name = item.querySelector('h4').textContent;
+                            existingItems.set(name, item);
+                        });
+
+                        // Process new data
+                        data.new_data.slice(0, 5).forEach(detection => {
+                            const name = detection.name || 'N/A';
+                            let activityItem = existingItems.get(name);
+
+                            if (activityItem) {
+                                // Update existing item
+                                const iconElement = activityItem.querySelector('.activity-icon i');
+                                const contentElement = activityItem.querySelector('.activity-content p');
+                                const timeElement = activityItem.querySelector('.activity-content small');
+
+                                // Update icon
+                                let iconClass = 'fas fa-check-circle text-success';
+                                if (detection.label === 'non_penguin') {
+                                    iconClass = 'fas fa-exclamation-triangle text-danger';
+                                } else if (detection.label === 'molting') {
+                                    iconClass = 'fas fa-feather-alt text-warning';
+                                }
+                                iconElement.className = iconClass;
+
+                                // Update status text
+                                let statusText = 'Normal status';
+                                if (detection.label === 'non_penguin') {
+                                    statusText = '<span class="text-danger">⚠️ DANGER: Non-penguin object detected!</span>';
+                                } else if (detection.label === 'molting') {
+                                    statusText = `Molting detected (${(detection.confidence * 100).toFixed(1)}% confidence)`;
+                                } else {
+                                    statusText = `Normal status (${(detection.confidence * 100).toFixed(1)}% confidence)`;
+                                }
+                                contentElement.innerHTML = statusText;
+
+                                // Update timestamp
+                                timeElement.textContent = new Date(detection.timestamp).toLocaleString();
+
+                                // Update danger class if needed
+                                activityItem.className = `activity-item ${detection.label === 'non_penguin' ? 'danger' : ''}`;
+
+                                // Move to top of list
+                                activityList.insertBefore(activityItem, activityList.firstChild);
+                            } else {
+                                // Create new item
+                                const newItem = document.createElement('div');
+                                newItem.className = `activity-item ${detection.label === 'non_penguin' ? 'danger' : ''}`;
+                                
+                                let iconClass = 'fas fa-check-circle text-success';
+                                if (detection.label === 'non_penguin') {
+                                    iconClass = 'fas fa-exclamation-triangle text-danger';
+                                } else if (detection.label === 'molting') {
+                                    iconClass = 'fas fa-feather-alt text-warning';
+                                }
+
+                                let statusText = 'Normal status';
+                                if (detection.label === 'non_penguin') {
+                                    statusText = '<span class="text-danger">⚠️ DANGER: Non-penguin object detected!</span>';
+                                } else if (detection.label === 'molting') {
+                                    statusText = `Molting detected (${(detection.confidence * 100).toFixed(1)}% confidence)`;
+                                } else {
+                                    statusText = `Normal status (${(detection.confidence * 100).toFixed(1)}% confidence)`;
+                                }
+
+                                newItem.innerHTML = `
+                                    <div class="activity-icon">
+                                        <i class="${iconClass}"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <h4>${name}</h4>
+                                        <p>${statusText}</p>
+                                        <small>${new Date(detection.timestamp).toLocaleString()}</small>
+                                    </div>
+                                `;
+                                
+                                // Add to top of list
+                                activityList.insertBefore(newItem, activityList.firstChild);
+                            }
+                        });
+
+                        // Remove excess items if more than 5
+                        while (activityList.children.length > 5) {
+                            activityList.removeChild(activityList.lastChild);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating recent activity:', error);
+                });
+            }
+
+            // Handle form submission (keep existing manual add logic)
+            document.getElementById('manualDetectionForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                
+                try {
+                    const response = await fetch('/add_penguin', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        // Close the modal
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('manualDetectionModal'));
+                        modal.hide();
+                        
+                        // Reload the page to show the new penguin in recent activity and stats
+                        // Alternatively, update recent activity and stats dynamically here
+                        // For simplicity, let's just reload for now.
+                        window.location.reload();
+                    } else {
+                        const data = await response.json();
+                        alert('Error: ' + data.error);
+                    }
+                } catch (error) {
+                    alert('Error adding penguin: ' + error.message);
+                }
+            });
+
+            // Update stats when page loads
+            updateStats();
+            updateRecentActivity();
+
+            // Add periodic updates
+            setInterval(updateStats, 10000); // Update stats every 10 seconds
+            setInterval(updateRecentActivity, 5000); // Update recent activity every 5 seconds
+
+            // Optional: Add animation to stats cards on load
+            document.querySelectorAll('.stats-card').forEach(card => {
+                card.style.opacity = 0;
+                card.style.transform = 'translateY(20px)';
+            });
+
+            window.addEventListener('load', () => {
+                document.querySelectorAll('.stats-card').forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                        card.style.opacity = 1;
+                        card.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+            });
+
+             // Ensure Start Detection button redirects to the live detection page
+            const startDetectionButton = document.getElementById('startDetectionButton');
+            if (startDetectionButton) {
+                startDetectionButton.addEventListener('click', function() {
+                    window.location.href = '/live_detection';
+                });
+            }
+
+        })(); // End of IIFE
+
+    </script>
+</body>
+</html> 
